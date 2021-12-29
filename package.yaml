@@ -33,9 +33,13 @@ library:
   source-dirs: src
   extra-libraries:
   - primesieve
+  dependencies:
+  - vector
   exposed-modules:
   - Math.NumberTheory.PrimeSieve
   - Math.NumberTheory.PrimeSieve.FFI
+  c-sources:
+  - cbits/primesieve_iterator_size.c
   when:
   - condition: false
     other-modules: Paths_primesieve
