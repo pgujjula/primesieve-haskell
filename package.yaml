@@ -1,0 +1,53 @@
+name:        primesieve
+version:     0.1.0.0
+synopsis:    Bindings to the primesieve library
+github:      "pgujjula/primesieve-haskell"
+license:     BSD-3-Clause
+author:      "Preetham Gujjula"
+maintainer:  "primesieve-haskell@mail.preetham.io"
+copyright:   "2021 Preetham Gujjula"
+category:    Math
+description: Please see the README on Github at
+             <https://github.com/pgujjula/primesieve-haskell#readme>
+
+tested-with: GHC ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.1 || ==9.2.1
+extra-source-files:
+- README.md
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Wmissing-export-lists
+- -Wincomplete-record-updates
+- -Wpartial-fields
+- -Wmissing-home-modules
+- -Werror=missing-home-modules
+- -Widentities
+- -Wredundant-constraints
+- -Wmissing-export-lists
+
+dependencies:
+- base >= 4.7 && < 5.0
+
+library:
+  source-dirs: src
+  extra-libraries:
+  - primesieve
+  exposed-modules:
+  - Math.NumberTheory.PrimeSieve
+  - Math.NumberTheory.PrimeSieve.FFI
+  when:
+  - condition: false
+    other-modules: Paths_primesieve
+
+tests:
+  spec:
+    source-dirs: test
+    dependencies:
+    - primesieve
+    - silently
+    - tasty
+    - tasty-hunit
+    main: Main.hs
+    other-modules:
+    - Test.Math.NumberTheory.PrimeSieve

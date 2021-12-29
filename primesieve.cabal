@@ -1,0 +1,56 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
+
+name:           primesieve
+version:        0.1.0.0
+synopsis:       Bindings to the primesieve library
+description:    Please see the README on Github at <https://github.com/pgujjula/primesieve-haskell#readme>
+category:       Math
+homepage:       https://github.com/pgujjula/primesieve-haskell#readme
+bug-reports:    https://github.com/pgujjula/primesieve-haskell/issues
+author:         Preetham Gujjula
+maintainer:     primesieve-haskell@mail.preetham.io
+copyright:      2021 Preetham Gujjula
+license:        BSD-3-Clause
+license-file:   LICENSE
+build-type:     Simple
+tested-with:
+    GHC ==8.4.4 || ==8.6.5 || ==8.8.4 || ==8.10.7 || ==9.0.1 || ==9.2.1
+extra-source-files:
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/pgujjula/primesieve-haskell
+
+library
+  exposed-modules:
+      Math.NumberTheory.PrimeSieve
+      Math.NumberTheory.PrimeSieve.FFI
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -Wmissing-export-lists -Wincomplete-record-updates -Wpartial-fields -Wmissing-home-modules -Werror=missing-home-modules -Widentities -Wredundant-constraints -Wmissing-export-lists
+  extra-libraries:
+      primesieve
+  build-depends:
+      base >=4.7 && <5.0
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Test.Math.NumberTheory.PrimeSieve
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Wmissing-export-lists -Wincomplete-record-updates -Wpartial-fields -Wmissing-home-modules -Werror=missing-home-modules -Widentities -Wredundant-constraints -Wmissing-export-lists
+  build-depends:
+      base >=4.7 && <5.0
+    , primesieve
+    , silently
+    , tasty
+    , tasty-hunit
+  default-language: Haskell2010
