@@ -33,6 +33,8 @@ library:
   source-dirs: src
   extra-libraries:
   - primesieve
+  dependencies:
+  - vector
   exposed-modules:
   - Math.NumberTheory.PrimeSieve
   - Math.NumberTheory.PrimeSieve.FFI
