@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -11,9 +12,12 @@
 -- This module provides a high-level, polymorphic interface to the primesieve
 -- library. For a lower-level interface, see "Math.NumberTheory.PrimeSieve.FFI#".
 module Math.NumberTheory.PrimeSieve
-  ( Sievable (..),
+  ( -- * Strict prime generation
+    Sievable,
     generatePrimes,
     generateNPrimes,
+
+    -- * Prime counting
     nthPrime,
     countPrimes,
     countTwins,
@@ -21,16 +25,32 @@ module Math.NumberTheory.PrimeSieve
     countQuadruplets,
     countQuintuplets,
     countSextuplets,
+
+    -- * Prime printing
+    printPrimes,
+    printTwins,
+    printTriplets,
+    printQuadruplets,
+    printQuintuplets,
+    printSextuplets,
+
+    -- * Lazy prime generation
     primes,
     primesTo,
     primesFrom,
     primesFromTo,
+
+    -- * Sieve configuration
+    getMaxStop,
+    getSieveSize,
+    getNumThreads,
+    setSieveSize,
+    setNumThreads,
   )
 where
 
 import Control.Monad (void)
 import Data.Int (Int16, Int32, Int64)
-import Data.Proxy (Proxy (Proxy))
 import Data.Vector.Storable (Vector, unsafeFromForeignPtr0)
 import Data.Word (Word16, Word32, Word64)
 import Foreign.C.Types
@@ -56,66 +76,68 @@ import System.IO.Unsafe (unsafeInterleaveIO, unsafePerformIO)
 -- data families for the same purpose (I think).
 
 class (Integral a, Storable a) => Sievable a where
-  returnType :: Proxy a -> PrimesieveReturnType
-
-getTypeCode :: Sievable a => Proxy a -> CInt
-getTypeCode = fromIntegral . fromEnum . returnType
+  primesieveReturnCode :: PrimesieveReturnCode
 
 instance Sievable CShort where
-  returnType _ = SHORT_PRIMES
+  primesieveReturnCode = SHORT_PRIMES
 
 instance Sievable CUShort where
-  returnType _ = USHORT_PRIMES
+  primesieveReturnCode = USHORT_PRIMES
 
 instance Sievable CInt where
-  returnType _ = INT_PRIMES
+  primesieveReturnCode = INT_PRIMES
 
 instance Sievable CUInt where
-  returnType _ = UINT_PRIMES
+  primesieveReturnCode = UINT_PRIMES
 
 instance Sievable CLong where
-  returnType _ = LONG_PRIMES
+  primesieveReturnCode = LONG_PRIMES
 
 instance Sievable CULong where
-  returnType _ = ULONG_PRIMES
+  primesieveReturnCode = ULONG_PRIMES
 
 instance Sievable CLLong where
-  returnType _ = LONGLONG_PRIMES
+  primesieveReturnCode = LONGLONG_PRIMES
 
 instance Sievable CULLong where
-  returnType _ = ULONGLONG_PRIMES
+  primesieveReturnCode = ULONGLONG_PRIMES
 
 instance Sievable Int16 where
-  returnType _ = INT16_PRIMES
+  primesieveReturnCode = INT16_PRIMES
 
 instance Sievable Word16 where
-  returnType _ = UINT16_PRIMES
+  primesieveReturnCode = UINT16_PRIMES
 
 instance Sievable Int32 where
-  returnType _ = INT32_PRIMES
+  primesieveReturnCode = INT32_PRIMES
 
 instance Sievable Word32 where
-  returnType _ = UINT32_PRIMES
+  primesieveReturnCode = UINT32_PRIMES
 
 instance Sievable Int64 where
-  returnType _ = INT64_PRIMES
+  primesieveReturnCode = INT64_PRIMES
 
 instance Sievable Word64 where
-  returnType _ = UINT64_PRIMES
+  primesieveReturnCode = UINT64_PRIMES
 
-generatePrimes :: forall a. Sievable a => Word64 -> Word64 -> IO (Vector a)
-generatePrimes start stop = alloca $ \(sizePtr :: Ptr CSize) -> do
-  let typeCode = getTypeCode @a Proxy
-  arrayPtr <- castPtr <$> primesieve_generate_primes start stop sizePtr typeCode
+generatePrimes :: Sievable a => Word64 -> Word64 -> IO (Vector a)
+generatePrimes = generatePrimes'
+
+generatePrimes' :: forall a. Sievable a => Word64 -> Word64 -> IO (Vector a)
+generatePrimes' start stop = alloca $ \(sizePtr :: Ptr CSize) -> do
+  let type' = fromIntegral (fromEnum (primesieveReturnCode @a))
+  arrayPtr <- castPtr <$> primesieve_generate_primes start stop sizePtr type'
   size <- fromIntegral <$> peek sizePtr
   foreignPtr <- newForeignPtr (castFunPtr primesieve_free_ptr) arrayPtr
   pure (unsafeFromForeignPtr0 foreignPtr size)
 
-generateNPrimes :: forall a. Sievable a => Word64 -> Word64 -> IO (Vector a)
-generateNPrimes n start = do
-  let typeCode :: CInt
-      typeCode = getTypeCode @a Proxy
-  arrayPtr <- castPtr <$> primesieve_generate_n_primes n start typeCode
+generateNPrimes :: Sievable a => Word64 -> Word64 -> IO (Vector a)
+generateNPrimes = generateNPrimes'
+
+generateNPrimes' :: forall a. Sievable a => Word64 -> Word64 -> IO (Vector a)
+generateNPrimes' n start = do
+  let type' = fromIntegral (fromEnum (primesieveReturnCode @a))
+  arrayPtr <- castPtr <$> primesieve_generate_n_primes n start type'
   foreignPtr <- newForeignPtr (castFunPtr primesieve_free_ptr) arrayPtr
   -- TODO: Safely truncate n
   pure (unsafeFromForeignPtr0 foreignPtr (fromIntegral n))
@@ -141,6 +163,39 @@ countQuintuplets = primesieve_count_quintuplets
 countSextuplets :: Word64 -> Word64 -> Word64
 countSextuplets = primesieve_count_sextuplets
 
+printPrimes :: Word64 -> Word64 -> IO ()
+printPrimes = primesieve_print_primes
+
+printTwins :: Word64 -> Word64 -> IO ()
+printTwins = primesieve_print_twins
+
+printTriplets :: Word64 -> Word64 -> IO ()
+printTriplets = primesieve_print_triplets
+
+printQuadruplets :: Word64 -> Word64 -> IO ()
+printQuadruplets = primesieve_print_quadruplets
+
+printQuintuplets :: Word64 -> Word64 -> IO ()
+printQuintuplets = primesieve_print_quintuplets
+
+printSextuplets :: Word64 -> Word64 -> IO ()
+printSextuplets = primesieve_print_sextuplets
+
+getMaxStop :: Word64
+getMaxStop = primesieve_get_max_stop
+
+getSieveSize :: IO CInt
+getSieveSize = primesieve_get_sieve_size
+
+getNumThreads :: IO CInt
+getNumThreads = primesieve_get_num_threads
+
+setSieveSize :: CInt -> IO ()
+setSieveSize = primesieve_set_sieve_size
+
+setNumThreads :: CInt -> IO ()
+setNumThreads = primesieve_set_num_threads
+
 primes :: [Word64]
 primes = primesFrom 0
 
@@ -152,7 +207,7 @@ primesFrom start = primesFromTo start primesieve_get_max_stop
 
 primesFromTo :: Word64 -> Word64 -> [Word64]
 primesFromTo start stop = unsafePerformIO $ do
-  iterForeignPtr <- mallocForeignPtrBytes (fromIntegral primesieveIteratorSize)
+  iterForeignPtr <- mallocForeignPtrBytes (fromIntegral primesieve_iterator_size)
   addForeignPtrFinalizer primesieve_free_iterator_ptr iterForeignPtr
   withForeignPtr iterForeignPtr $ \iterPtr -> do
     void (primesieve_init iterPtr)

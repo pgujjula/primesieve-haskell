@@ -33,6 +33,8 @@ library
   hs-source-dirs:
       src
   ghc-options: -Wall -Wcompat -Wmissing-export-lists -Wincomplete-record-updates -Wpartial-fields -Wmissing-home-modules -Werror=missing-home-modules -Widentities -Wredundant-constraints -Wmissing-export-lists
+  c-sources:
+      cbits/primesieve_iterator_size.c
   extra-libraries:
       primesieve
   build-depends:

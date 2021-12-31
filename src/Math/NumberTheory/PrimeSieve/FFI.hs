@@ -16,7 +16,7 @@
 -- and [@primesieve/iterator.h@](https://primesieve.org/api/iterator_8h.html)
 module Math.NumberTheory.PrimeSieve.FFI
   ( -- * From @primesieve.h@
-    PrimesieveReturnType (..),
+    PrimesieveReturnCode (..),
     primesieve_generate_primes,
     primesieve_generate_n_primes,
     primesieve_nth_prime,
@@ -43,7 +43,7 @@ module Math.NumberTheory.PrimeSieve.FFI
 
     -- * From @primesieve/iterator.h@
     PrimesieveIterator,
-    primesieveIteratorSize,
+    primesieve_iterator_size,
     primesieve_init,
     primesieve_free_iterator,
     primesieve_free_iterator_ptr,
@@ -56,11 +56,10 @@ where
 import Data.Int (Int64)
 import Data.Word (Word64)
 import Foreign.C.String (CString)
-import Foreign.C.Types (CSize, CInt (..))
-import Foreign.Ptr (Ptr)
-import Foreign.ForeignPtr (FinalizerPtr)
+import Foreign.C.Types (CSize (..), CInt (..))
+import Foreign.Ptr (Ptr, FunPtr)
 
-data PrimesieveReturnType
+data PrimesieveReturnCode
   = SHORT_PRIMES
   | USHORT_PRIMES
   | INT_PRIMES
@@ -141,7 +140,7 @@ foreign import ccall unsafe "primesieve_free"
   primesieve_free :: Ptr () -> IO ()
 
 foreign import ccall unsafe "&primesieve_free"
-  primesieve_free_ptr :: FinalizerPtr ()
+  primesieve_free_ptr :: FunPtr (Ptr () -> IO ())
 
 foreign import ccall unsafe "primesieve_version"
   primesieve_version :: CString
@@ -152,8 +151,8 @@ foreign import ccall unsafe "primesieve_version"
 
 data PrimesieveIterator
 
-primesieveIteratorSize :: CSize
-primesieveIteratorSize = 80
+foreign import ccall unsafe "primesieve_iterator_size"
+  primesieve_iterator_size :: CSize
 
 foreign import ccall unsafe "primesieve_init"
   primesieve_init :: Ptr PrimesieveIterator -> IO ()
@@ -162,7 +161,7 @@ foreign import ccall unsafe "primesieve_free_iterator"
   primesieve_free_iterator :: Ptr PrimesieveIterator -> IO ()
 
 foreign import ccall unsafe "&primesieve_free_iterator"
-  primesieve_free_iterator_ptr :: FinalizerPtr PrimesieveIterator
+  primesieve_free_iterator_ptr :: FunPtr (Ptr PrimesieveIterator -> IO ())
 
 foreign import ccall unsafe "primesieve_skipto"
   primesieve_skipto :: Ptr PrimesieveIterator -> Word64 -> Word64 -> IO ()
