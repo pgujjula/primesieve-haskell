@@ -1,4 +1,3 @@
-{-# LANGUAGE ImportQualifiedPost #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -32,8 +31,7 @@ where
 import Control.Monad (void)
 import Data.Int (Int16, Int32, Int64)
 import Data.Proxy (Proxy (Proxy))
-import Data.Vector.Storable (Vector)
-import Data.Vector.Storable qualified as Vector
+import Data.Vector.Storable (Vector, unsafeFromForeignPtr0)
 import Data.Word (Word16, Word32, Word64)
 import Foreign.C.Types
   ( CInt,
@@ -111,7 +109,7 @@ generatePrimes start stop = alloca $ \(sizePtr :: Ptr CSize) -> do
   arrayPtr <- castPtr <$> primesieve_generate_primes start stop sizePtr typeCode
   size <- fromIntegral <$> peek sizePtr
   foreignPtr <- newForeignPtr (castFunPtr primesieve_free_ptr) arrayPtr
-  pure (Vector.unsafeFromForeignPtr0 foreignPtr size)
+  pure (unsafeFromForeignPtr0 foreignPtr size)
 
 generateNPrimes :: forall a. Sievable a => Word64 -> Word64 -> IO (Vector a)
 generateNPrimes n start = do
@@ -120,7 +118,7 @@ generateNPrimes n start = do
   arrayPtr <- castPtr <$> primesieve_generate_n_primes n start typeCode
   foreignPtr <- newForeignPtr (castFunPtr primesieve_free_ptr) arrayPtr
   -- TODO: Safely truncate n
-  pure (Vector.unsafeFromForeignPtr0 foreignPtr (fromIntegral n))
+  pure (unsafeFromForeignPtr0 foreignPtr (fromIntegral n))
 
 nthPrime :: Int64 -> Word64 -> Word64
 nthPrime = primesieve_nth_prime
