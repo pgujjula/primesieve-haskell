@@ -120,22 +120,23 @@ instance Sievable Int64 where
 instance Sievable Word64 where
   primesieveReturnCode = UINT64_PRIMES
 
-generatePrimes :: Sievable a => Word64 -> Word64 -> IO (Vector a)
+generatePrimes :: Sievable a => Word64 -> Word64 -> Vector a
 generatePrimes = generatePrimes'
 
-generatePrimes' :: forall a. Sievable a => Word64 -> Word64 -> IO (Vector a)
-generatePrimes' start stop = alloca $ \(sizePtr :: Ptr CSize) -> do
-  let type' = fromIntegral (fromEnum (primesieveReturnCode @a))
-  arrayPtr <- castPtr <$> primesieve_generate_primes start stop sizePtr type'
-  size <- fromIntegral <$> peek sizePtr
-  foreignPtr <- newForeignPtr (castFunPtr primesieve_free_ptr) arrayPtr
-  pure (unsafeFromForeignPtr0 foreignPtr size)
+generatePrimes' :: forall a. Sievable a => Word64 -> Word64 -> Vector a
+generatePrimes' start stop = unsafePerformIO $
+  alloca $ \(sizePtr :: Ptr CSize) -> do
+    let type' = fromIntegral (fromEnum (primesieveReturnCode @a))
+    arrayPtr <- castPtr <$> primesieve_generate_primes start stop sizePtr type'
+    size <- fromIntegral <$> peek sizePtr
+    foreignPtr <- newForeignPtr (castFunPtr primesieve_free_ptr) arrayPtr
+    pure (unsafeFromForeignPtr0 foreignPtr size)
 
-generateNPrimes :: Sievable a => Word64 -> Word64 -> IO (Vector a)
+generateNPrimes :: Sievable a => Word64 -> Word64 -> Vector a
 generateNPrimes = generateNPrimes'
 
-generateNPrimes' :: forall a. Sievable a => Word64 -> Word64 -> IO (Vector a)
-generateNPrimes' n start = do
+generateNPrimes' :: forall a. Sievable a => Word64 -> Word64 -> Vector a
+generateNPrimes' n start = unsafePerformIO $ do
   let type' = fromIntegral (fromEnum (primesieveReturnCode @a))
   arrayPtr <- castPtr <$> primesieve_generate_n_primes n start type'
   foreignPtr <- newForeignPtr (castFunPtr primesieve_free_ptr) arrayPtr
