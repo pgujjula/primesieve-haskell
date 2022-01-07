@@ -1,7 +1,7 @@
 {-# LANGUAGE CApiFFI #-}
 
 -- |
--- Module      : Math.NumberTheory.PrimeSieve
+-- Module      : Math.NumberTheory.Prime.Sieve.FFI
 -- Copyright   : 2021 Preetham Gujjula
 -- License     : BSD3
 -- Maintainer  : primesieve-haskell@mail.preetham.io
@@ -14,7 +14,7 @@
 -- Documentation adapted from
 -- [@primesieve.h@](https://primesieve.org/api/primesieve_8h.html).
 -- and [@primesieve/iterator.h@](https://primesieve.org/api/iterator_8h.html)
-module Math.NumberTheory.PrimeSieve.FFI
+module Math.NumberTheory.Prime.Sieve.FFI
   ( -- * From @primesieve.h@
     PrimesieveReturnCode (..),
     primesieve_generate_primes,
