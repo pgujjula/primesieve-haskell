@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeApplications #-}
 
 -- |
--- Module      : Math.NumberTheory.PrimeSieve
+-- Module      : Math.NumberTheory.Prime.Sieve
 -- Copyright   : 2021 Preetham Gujjula
 -- License     : BSD3
 -- Maintainer  : primesieve-haskell@mail.preetham.io
@@ -11,7 +11,7 @@
 --
 -- This module provides a high-level, polymorphic interface to the primesieve
 -- library. For a lower-level interface, see "Math.NumberTheory.PrimeSieve.FFI#".
-module Math.NumberTheory.PrimeSieve
+module Math.NumberTheory.Prime.Sieve
   ( -- * Strict prime generation
     Sievable,
     generatePrimes,
@@ -68,7 +68,7 @@ import Foreign.ForeignPtr (addForeignPtrFinalizer, mallocForeignPtrBytes, newFor
 import Foreign.Marshal.Alloc (alloca)
 import Foreign.Ptr (Ptr, castFunPtr, castPtr)
 import Foreign.Storable (Storable, peek)
-import Math.NumberTheory.PrimeSieve.FFI
+import Math.NumberTheory.Prime.Sieve.FFI
 import System.IO.Unsafe (unsafeInterleaveIO, unsafePerformIO)
 
 -- TODO: Look at ways to replace the typeclass with something closed.

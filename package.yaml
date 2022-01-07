@@ -36,8 +36,8 @@ library:
   dependencies:
   - vector
   exposed-modules:
-  - Math.NumberTheory.PrimeSieve
-  - Math.NumberTheory.PrimeSieve.FFI
+  - Math.NumberTheory.Prime.Sieve
+  - Math.NumberTheory.Prime.Sieve.FFI
   c-sources:
   - cbits/primesieve_iterator_size.c
   when:
@@ -54,4 +54,4 @@ tests:
     - tasty-hunit
     main: Main.hs
     other-modules:
-    - Test.Math.NumberTheory.PrimeSieve
+    - Test.Math.NumberTheory.Prime.Sieve
