@@ -6,7 +6,7 @@
 -- Module      : Math.NumberTheory.Prime.Sieve
 -- Copyright   : 2021 Preetham Gujjula
 -- License     : BSD3
--- Maintainer  : primesieve-haskell@mail.preetham.io
+-- Maintainer  : libraries@mail.preetham.io
 -- Stability   : experimental
 --
 -- This module provides a high-level, polymorphic interface to the primesieve
@@ -71,77 +71,83 @@ import Foreign.Storable (Storable, peek)
 import Math.NumberTheory.Prime.Sieve.FFI
 import System.IO.Unsafe (unsafeInterleaveIO, unsafePerformIO)
 
--- TODO: Look at ways to replace the typeclass with something closed.
--- I remember seeing in another library, them using type families or
--- data families for the same purpose (I think).
-
 class (Integral a, Storable a) => Sievable a where
-  primesieveReturnCode :: PrimesieveReturnCode
+  primesieveGenerateFormat :: PrimesieveGenerateFormat
 
 instance Sievable CShort where
-  primesieveReturnCode = SHORT_PRIMES
+  primesieveGenerateFormat = SHORT_PRIMES
 
 instance Sievable CUShort where
-  primesieveReturnCode = USHORT_PRIMES
+  primesieveGenerateFormat = USHORT_PRIMES
 
 instance Sievable CInt where
-  primesieveReturnCode = INT_PRIMES
+  primesieveGenerateFormat = INT_PRIMES
 
 instance Sievable CUInt where
-  primesieveReturnCode = UINT_PRIMES
+  primesieveGenerateFormat = UINT_PRIMES
 
 instance Sievable CLong where
-  primesieveReturnCode = LONG_PRIMES
+  primesieveGenerateFormat = LONG_PRIMES
 
 instance Sievable CULong where
-  primesieveReturnCode = ULONG_PRIMES
+  primesieveGenerateFormat = ULONG_PRIMES
 
 instance Sievable CLLong where
-  primesieveReturnCode = LONGLONG_PRIMES
+  primesieveGenerateFormat = LONGLONG_PRIMES
 
 instance Sievable CULLong where
-  primesieveReturnCode = ULONGLONG_PRIMES
+  primesieveGenerateFormat = ULONGLONG_PRIMES
 
 instance Sievable Int16 where
-  primesieveReturnCode = INT16_PRIMES
+  primesieveGenerateFormat = INT16_PRIMES
 
 instance Sievable Word16 where
-  primesieveReturnCode = UINT16_PRIMES
+  primesieveGenerateFormat = UINT16_PRIMES
 
 instance Sievable Int32 where
-  primesieveReturnCode = INT32_PRIMES
+  primesieveGenerateFormat = INT32_PRIMES
 
 instance Sievable Word32 where
-  primesieveReturnCode = UINT32_PRIMES
+  primesieveGenerateFormat = UINT32_PRIMES
 
 instance Sievable Int64 where
-  primesieveReturnCode = INT64_PRIMES
+  primesieveGenerateFormat = INT64_PRIMES
 
 instance Sievable Word64 where
-  primesieveReturnCode = UINT64_PRIMES
+  primesieveGenerateFormat = UINT64_PRIMES
 
+-- | Generate the primes in the interval @(start, stop]@.
+--
+--   >>> generatePrimes 10 20
+--   [11,13,17,19]
 generatePrimes :: Sievable a => Word64 -> Word64 -> Vector a
 generatePrimes = generatePrimes'
 
 generatePrimes' :: forall a. Sievable a => Word64 -> Word64 -> Vector a
 generatePrimes' start stop = unsafePerformIO $
   alloca $ \(sizePtr :: Ptr CSize) -> do
-    let type' = fromIntegral (fromEnum (primesieveReturnCode @a))
+    let type' = fromIntegral (fromEnum (primesieveGenerateFormat @a))
     arrayPtr <- castPtr <$> primesieve_generate_primes start stop sizePtr type'
     size <- fromIntegral <$> peek sizePtr
     foreignPtr <- newForeignPtr (castFunPtr primesieve_free_ptr) arrayPtr
     pure (unsafeFromForeignPtr0 foreignPtr size)
+{-# NOINLINE generatePrimes' #-}
 
+-- | The first @n@ primes from the given @start@.
+--
+--   >>> generateNPrimes 5 11
+--   [11,13,17,19,23]
 generateNPrimes :: Sievable a => Word64 -> Word64 -> Vector a
 generateNPrimes = generateNPrimes'
 
 generateNPrimes' :: forall a. Sievable a => Word64 -> Word64 -> Vector a
 generateNPrimes' n start = unsafePerformIO $ do
-  let type' = fromIntegral (fromEnum (primesieveReturnCode @a))
+  let type' = fromIntegral (fromEnum (primesieveGenerateFormat @a))
   arrayPtr <- castPtr <$> primesieve_generate_n_primes n start type'
   foreignPtr <- newForeignPtr (castFunPtr primesieve_free_ptr) arrayPtr
   -- TODO: Safely truncate n
   pure (unsafeFromForeignPtr0 foreignPtr (fromIntegral n))
+{-# NOINLINE generateNPrimes' #-}
 
 nthPrime :: Int64 -> Word64 -> Word64
 nthPrime = primesieve_nth_prime

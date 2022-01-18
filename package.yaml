@@ -4,7 +4,7 @@ synopsis:    Bindings to the primesieve library
 github:      "pgujjula/primesieve-haskell"
 license:     BSD-3-Clause
 author:      "Preetham Gujjula"
-maintainer:  "primesieve-haskell@mail.preetham.io"
+maintainer:  "libraries@mail.preetham.io"
 copyright:   "2021 Preetham Gujjula"
 category:    Math
 description: Please see the README on Github at
@@ -45,7 +45,7 @@ library:
     other-modules: Paths_primesieve
 
 tests:
-  spec:
+  primesieve-tests:
     source-dirs: test
     dependencies:
     - primesieve
