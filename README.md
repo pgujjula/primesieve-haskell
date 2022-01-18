@@ -25,4 +25,4 @@ cabal haddock  # and then open the documentation manually
 
 ### Bugs
 Report any bugs on the Github issue tracker, or by emailing
-primesieve-haskell@mail.preetham.io
+libraries@mail.preetham.io
