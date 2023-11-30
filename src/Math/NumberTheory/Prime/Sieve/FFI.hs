@@ -50,7 +50,7 @@ module Math.NumberTheory.Prime.Sieve.FFI
     primesieve_init,
     primesieve_free_iterator,
     primesieve_free_iterator_ptr,
-    primesieve_skipto,
+    primesieve_jump_to,
     primesieve_next_prime,
     primesieve_prev_prime,
   )
@@ -217,8 +217,8 @@ foreign import ccall unsafe "&primesieve_free_iterator"
   primesieve_free_iterator_ptr :: FinalizerPtr PrimesieveIterator
 
 -- | Reset the 'PrimesieveIterator' to @start@.
-foreign import ccall unsafe "primesieve_skipto"
-  primesieve_skipto :: Ptr PrimesieveIterator -> Word64 -> Word64 -> IO ()
+foreign import ccall unsafe "primesieve_jump_to"
+  primesieve_jump_to :: Ptr PrimesieveIterator -> Word64 -> Word64 -> IO ()
 
 -- | Get the next prime. Returns @'maxBound' :: 'Word64'@ if next prime
 --   @> 2^64@.

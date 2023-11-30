@@ -66,9 +66,9 @@ jobs:
       - name: Set up primesieve
         run: |
           apt-get install -y --no-install-recommends cmake
-          wget https://github.com/kimwalisch/primesieve/archive/refs/tags/v7.7.tar.gz
-          tar -xvf v7.7.tar.gz
-          cd primesieve-7.7
+          wget https://github.com/kimwalisch/primesieve/archive/refs/tags/v11.1.tar.gz
+          tar -xvf v11.1.tar.gz
+          cd primesieve-11.1
           cmake . -DBUILD_PRIMESIEVE=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF
           make -j
           PRIMESIEVE_DIR=$(readlink -f .)

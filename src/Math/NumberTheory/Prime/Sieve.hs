@@ -218,7 +218,7 @@ primesFromTo start stop = unsafePerformIO $ do
   addForeignPtrFinalizer primesieve_free_iterator_ptr iterForeignPtr
   withForeignPtr iterForeignPtr $ \iterPtr -> do
     void (primesieve_init iterPtr)
-    primesieve_skipto iterPtr start stop
+    primesieve_jump_to iterPtr start stop
   iterateIO stop (withForeignPtr iterForeignPtr primesieve_next_prime)
 
 {-# NOINLINE primesFrom #-}
